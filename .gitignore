@@ -1,5 +1,8 @@
 # output files
-bin/*
+bin
 
 # debug files
 traceback.txt
+
+.DS_Store
+

@@ -16,9 +16,10 @@ import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import flowtimer.FlowTimer;
+import flowtimer.FlowTimer.ITimerLabelUpdateCallback;
 import flowtimer.Gaussian;
 import flowtimer.IntTextField;
 
@@ -306,5 +307,12 @@ public class CalibrationTimer extends BaseTimer {
 		}
 
 		public abstract void onChange();
+	}
+
+public ITimerLabelUpdateCallback getTimerLabelUpdateCallback() {
+		return (startTime) -> currentOffsetComponent.getComponent().getValue() - (System.nanoTime() - startTime) / 1_000_000;
+	}
+
+public void onTimerLabelUpdate(long time) {
 	}
 }

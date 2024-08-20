@@ -24,9 +24,10 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-import org.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import flowtimer.FlowTimer;
+import flowtimer.FlowTimer.ITimerLabelUpdateCallback;
 import flowtimer.IntTextField;
 import flowtimer.MenuButton;
 import flowtimer.parsing.json.JSON;
@@ -167,14 +168,23 @@ public class DelayTimer extends BaseTimer {
 	}
 
 	public void onTimerStart(long startTime) {
+		System.out.println("HERE?");
 		runningTimer = selectedTimer;
 		flowtimer.scheduleActions(runningTimer.getOffsets(), runningTimer.getInterval(), runningTimer.getNumBeeps(), 0);
 		setInterface(false);
 	}
 
+
 	public void onTimerStop() {
 		flowtimer.setTimerLabel(selectedTimer.getMaxOffset());
 		setInterface(true);
+	}
+
+public ITimerLabelUpdateCallback getTimerLabelUpdateCallback() {
+		return (startTime) -> runningTimer.getMaxOffset() - (System.nanoTime() - startTime) / 1_000_000;
+	}
+
+public void onTimerLabelUpdate(long time) {
 	}
 
 	public void onKeyEvent(NativeKeyEvent e) {

@@ -5,9 +5,10 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 
-import org.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import flowtimer.FlowTimer;
+import flowtimer.FlowTimer.ITimerLabelUpdateCallback;
 
 public abstract class BaseTimer extends JPanel {
 	
@@ -39,4 +40,8 @@ public abstract class BaseTimer extends JPanel {
 	
 	// Returns whether or not the timer can be started
 	public abstract boolean canStartTimer();
+
+	public abstract ITimerLabelUpdateCallback getTimerLabelUpdateCallback();
+
+public abstract void onTimerLabelUpdate(long time);
 }

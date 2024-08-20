@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Console;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -16,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,9 +27,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
-import org.jnativehook.GlobalScreen;
-import org.jnativehook.keyboard.NativeKeyEvent;
-import org.jnativehook.keyboard.NativeKeyListener;
+import com.github.kwhat.jnativehook.GlobalScreen;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 import flowtimer.actions.Action;
 import flowtimer.actions.SoundAction;
@@ -76,6 +78,7 @@ public class FlowTimer {
 	private boolean isTimerRunning;
 	private boolean areActionsScheduled;
 	private long timerStartTime;
+	private TimerLabelUpdateThread timerLabelUpdateThread;
 
 	private SoundAction soundAction;
 	private VisualAction visualAction;
@@ -88,6 +91,9 @@ public class FlowTimer {
 		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
 		logger.setLevel(Level.OFF);
 		logger.setUseParentHandlers(false);
+//        ConsoleHandler handler = new ConsoleHandler();
+//handler.setLevel(Level.ALL);
+//logger.addHandler(handler);
 		GlobalScreen.registerNativeHook();
 		GlobalScreen.addNativeKeyListener(new GlobalScreenListener());
 		OpenAL.init();
@@ -124,11 +130,13 @@ public class FlowTimer {
 			private static final long serialVersionUID = 1L;
 			
 			public void paint(Graphics g) {
+				System.out.println("Hello world");
 				super.paint(g);
 				g.setColor(visualCueColor);
 				g.fillRect(0, 0, getWidth(), getHeight());
 			}
 		};
+
 		timerLabel.setBounds(11, 20, 110, 30);
 		timerLabel.setOpaque(true);
 		timerLabel.setFont(new Font("Consolas", Font.BOLD, 29));
@@ -259,6 +267,8 @@ public class FlowTimer {
 			timerStartTime = System.nanoTime();
 			getSelectedTimer().onTimerStart(timerStartTime);
 			setInterface(false);
+			timerLabelUpdateThread = new TimerLabelUpdateThread(getSelectedTimer().getTimerLabelUpdateCallback());
+			new Thread(timerLabelUpdateThread).start();
 		}
 	}
 
@@ -274,6 +284,7 @@ public class FlowTimer {
 		isTimerRunning = false;
 		areActionsScheduled = false;
 		getSelectedTimer().onTimerStop();
+		timerLabelUpdateThread.stop();
 		setInterface(true);
 		frame.repaint();
 	}
@@ -289,6 +300,7 @@ public class FlowTimer {
 			timers[i] = new Timer();
 			timers[i].scheduleAtFixedRate(actionThread, (offsets[i] - interval * (numBeeps - 1)) + universalOffset, interval);
 		}
+		this.setTimerLabel("HERERER");
 		areActionsScheduled = true;
 	}
 
@@ -360,6 +372,10 @@ public class FlowTimer {
 	}
 
 	public static void main(String[] args) {
+
+   //System.load("/Users/julesguesnon/Documents/FlowTimer-java/native/macosx/openal.dylib");
+   //System.load("/Users/julesguesnon/Documents/FlowTimer-java/native/macosx/liblwjgl.dylib");
+
 		try {
 			new FlowTimer();
 		} catch (Exception e) {
@@ -434,6 +450,42 @@ public class FlowTimer {
 					stopTimerSegment(index);
 				}
 			}
+		}
+	}
+
+public interface ITimerLabelUpdateCallback {
+	public long getTime(long startTime);
+}
+
+public class TimerLabelUpdateThread implements Runnable {
+
+		private ITimerLabelUpdateCallback timerLabelCallback;
+		private boolean isStopped;
+
+		public TimerLabelUpdateThread(ITimerLabelUpdateCallback timerLabelCallback) {
+			this.timerLabelCallback = timerLabelCallback;
+		}
+
+		public void run() {
+			while(!isStopped) {
+				long time = timerLabelCallback.getTime(timerStartTime);
+				getSelectedTimer().onTimerLabelUpdate(time);
+				setTimerLabel(time);
+				try {
+					// arbitrary sleep time to lower cpu usage
+					Thread.sleep(3);
+				} catch (InterruptedException e) {
+					ErrorHandler.handleException(e, false);
+				}
+			}
+		}
+
+		public void stop() {
+			isStopped = true;
+		}
+
+		public ITimerLabelUpdateCallback getTimerLabelCallback() {
+			return timerLabelCallback;
 		}
 	}
 }

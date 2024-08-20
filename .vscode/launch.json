@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch Main",
+      "request": "launch",
+      "mainClass": "flowtimer.FlowTimer",
+      "cwd": "${workspaceFolder}",
+      "shortenCommandLine": "none",
+      "vmArgs": "--add-exports java.desktop/com.sun.media.sound=ALL-UNNAMED "
+    }
+  ]
+}

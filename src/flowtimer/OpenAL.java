@@ -5,13 +5,19 @@ import static org.lwjgl.openal.AL10.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.util.WaveData;
 
 public class OpenAL {
@@ -28,12 +34,23 @@ public class OpenAL {
 	private static ArrayList<Integer> bufferList;
 	private static ArrayList<Integer> sourceList;
 
+	private static ALCapabilities _alCapabilities;
+	private static long device;
+	private static long context;
+
 	public static void init() {
 		try {
-			AL.create();
-			alListener(AL_POSITION, LISTENER_POSITION);
-			alListener(AL_VELOCITY, LISTENER_VELOCITY);
-			alListener(AL_ORIENTATION, LISTENER_ORIENTATION);
+			device = ALC10.alcOpenDevice((ByteBuffer) null);
+			ALCCapabilities alcCapabilities = ALC.createCapabilities(device);
+
+			context = ALC10.alcCreateContext(device, (IntBuffer) null);
+			ALC10.alcMakeContextCurrent(context);
+
+ 			_alCapabilities = AL.createCapabilities(alcCapabilities);
+
+			alListenerfv(AL_POSITION, LISTENER_POSITION);
+			alListenerfv(AL_VELOCITY, LISTENER_VELOCITY);
+			alListenerfv(AL_ORIENTATION, LISTENER_ORIENTATION);
 			loadedSounds = new HashMap<>();
 			bufferList = new ArrayList<>();
 			sourceList = new ArrayList<>();
@@ -67,8 +84,8 @@ public class OpenAL {
 		alSourcei(source, AL_BUFFER, buffer);
 		alSourcef(source, AL_PITCH, PITCH);
 		alSourcef(source, AL_GAIN, GAIN);
-		alSource(source, AL_POSITION, SOURCE_POSITION);
-		alSource(source, AL_VELOCITY, SOURCE_VELOCITY);
+		alSourcefv(source, AL_POSITION, SOURCE_POSITION);
+		alSourcefv(source, AL_VELOCITY, SOURCE_VELOCITY);
 		loadedSounds.put(filePath, source);
 		bufferList.add(buffer);
 		sourceList.add(source);
@@ -82,6 +99,7 @@ public class OpenAL {
 	public static void dispose() {
 		bufferList.forEach(AL10::alDeleteBuffers);
 		sourceList.forEach(AL10::alDeleteSources);
-		AL.destroy();
+		ALC10.alcDestroyContext(context);
+ 		ALC10.alcCloseDevice(device);
 	}
 }

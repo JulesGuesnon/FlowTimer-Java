@@ -3,12 +3,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="res"/>
-	<classpathentry kind="lib" path="lib/jnativehook-2.1.0.jar"/>
+  <classpathentry kind="lib" path="/Users/julesguesnon/Documents/FlowTimer-java/lib/jnativehook-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/lwjgl_util.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Simon/eclipse-workspace/FlowTimer/native/windows"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/lwjgl.jar"/>
+  <classpathentry kind="lib" path="lib/lwjgl-natives-macos-arm64.jar"/>
+  <classpathentry kind="lib" path="lib/lwjgl-openal-natives-macos-arm64.jar"/>
+	<classpathentry kind="lib" path="lib/lwjgl-openal.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

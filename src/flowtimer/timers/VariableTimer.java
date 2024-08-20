@@ -14,9 +14,10 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import flowtimer.FlowTimer;
+import flowtimer.FlowTimer.ITimerLabelUpdateCallback;
 import flowtimer.IntTextField;
 
 public class VariableTimer extends BaseTimer {
@@ -29,7 +30,16 @@ public class VariableTimer extends BaseTimer {
 	private VariableComponent<IntTextField> intervalComponent;
 	private VariableComponent<IntTextField> numBeepsComponent;
 	private JButton submitButton;
+
 	private JLabel errorLabel;
+
+public ITimerLabelUpdateCallback getTimerLabelUpdateCallback() {
+		return (startTime) -> (System.nanoTime() - startTime) / 1_000_000;
+	}
+
+public void onTimerLabelUpdate(long time) {
+		submitButton.setEnabled(flowtimer.isTimerRunning() && !flowtimer.areActionsScheduled() && isVariableDataValid());
+	}
 
 	public VariableTimer(FlowTimer flowtimer) {
 		super(flowtimer);
